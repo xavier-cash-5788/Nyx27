@@ -1,0 +1,345 @@
+================================================================================
+   NYX — NOTE DE SUIVI
+   État d'avancement et tâches restantes
+   Xavier · 2026 · Session du 26 octobre (mise à jour V21)
+================================================================================
+
+
+📍 CONTEXTE DE CETTE SESSION
+================================================================================
+
+Objectif initial : intégrer le module Archives compressées (compresseur
+universel adapté en module nyx/archives.py) pour que Nyx puisse stocker des
+notes compressées avec un plafond de 1 Go.
+
+Objectifs ajoutés en cours de session :
+  - Boucles d'archives autour des rêves :
+      * Lecture aléatoire d'une note AVANT le rêve
+      * Archivage automatique des rêves marquants APRÈS le rêve
+  - Lecture de documents par Nyx :
+      * Intention "lire_document" dans le chat
+      * Intention "lister_documents" dans le chat
+      * Pulsion "envie de lire" (compteur, lectures spontanées)
+
+État actuel : ✅ INTÉGRATION COMPLÈTE. Tous les modules sont livrés et
+compilent. Il reste les tests de validation à exécuter.
+
+
+================================================================================
+✅ CE QUI A ÉTÉ FAIT
+================================================================================
+
+1. nyx/archives.py — CRÉÉ ET VALIDÉ
+   ----------------------------------------------------------------
+   - Module complet avec pack_bytes() / unpack_bytes()
+   - Classification automatique par extension (ALREADY_COMPRESSED,
+     UNCOMPRESSED_MEDIA, TEXT_LIKE)
+   - Compression media-smart (store / zlib / bz2 / lzma / lzma_delta)
+   - Index JSON avec métadonnées (id, titre, type, fichier, tailles,
+     algo, date, tags, preview)
+   - API : ecrire_note(), lire_note(), lister(), chercher(), supprimer(),
+     purger_jusqua_limite(), stats(), exporter_tout()
+   - Plafond 1 Go avec purge automatique des plus anciennes
+   - Format .cpk binaire [magic][algo][taille][nom][données]
+   - Thread-safe (RLock)
+
+2. nyx/boucles_archives.py — CRÉÉ
+   ----------------------------------------------------------------
+   - Classe BouclesArchives
+   - avant_reve() : tire une note au hasard, la lit, la retourne tronquée
+     (400 car. max) pour injection dans le rêve
+   - apres_reve(liste_reves) : archive automatiquement les rêves marquants
+     (delta valence/activation OU mots-clés forts)
+   - Garde-fous :
+       * budget horaire (3 archives de rêve/heure par défaut)
+       * anti-doublon (par timestamp de rêve)
+       * flag cfg.archives_reves_actif (désactivable)
+       * erreurs silencieuses (ne casse jamais le sommeil)
+
+3. nyx/config.py — MIS À JOUR (V10)
+   ----------------------------------------------------------------
+   - VERSION_FICHIER = 10
+   - Section "Archives compressées" enrichie :
+       * archives_dossier = "archives"
+       * archives_limite_go = 1.0
+       * archives_compresser_auto = True
+       * archives_reves_actif = True                ← NOUVEAU
+       * archives_reves_budget_heure = 3            ← NOUVEAU
+       * archives_reves_seuil_marquant = 0.05       ← NOUVEAU
+   - Section "Pulsions" enrichie :
+       * lecture_auto_actif = True                  ← NOUVEAU
+       * SEUIL_ENVIE_LIRE = 0.55                    ← NOUVEAU
+       * ENVIE_LIRE_PAR_MINUTE = 0.03               ← NOUVEAU
+       * DELAI_INACTIVITE_LECTURE = 40              ← NOUVEAU
+       * DELAI_MIN_LECTURE = 300                    ← NOUVEAU
+
+4. nyx/consolidation.py — MIS À JOUR
+   ----------------------------------------------------------------
+   - Constructeur accepte archives= et sur_evenement=
+   - Instantie self.boucles = BouclesArchives(...) si archives fourni
+   - Phase REM modifiée :
+       * AVANT le cycle : self.boucles.avant_reve() → note_relue
+       * Injection : self.reves.fragment_prioritaire = note_relue
+       * APRÈS le cycle : self.boucles.apres_reve(liste_reves)
+   - Rapport de sommeil enrichi : "N rêve(s) archivé(s)"
+
+5. nyx/reves.py — MIS À JOUR (V20)
+   ----------------------------------------------------------------
+   - Attribut self.fragment_prioritaire (None par défaut)
+   - Dataclass _FragmentPrio pour la note relue
+   - selectionner_fragments() : si fragment_prioritaire défini, l'injecte
+     en premier puis le consomme (remis à None)
+   - Cycle REM inchangé (3 phases, T dynamique)
+
+6. nyx/pulsions.py — MIS À JOUR (V21)
+   ----------------------------------------------------------------
+   - Constructeur accepte lire= (callback lecture spontanée)
+   - Nouvel état : self.derniere_lecture, self.derniere_lecture_texte
+   - calculer() : ajoute "envie_lire" dans pulsions_cache
+   - tick() : déclenche AU PLUS UNE action, dans cet ordre :
+       1. sommeil auto (fatigue >= seuil + inactif)
+       2. annonce fatigue (une seule fois)
+       3. auto_reflexion (envie >= seuil + inactif + délai min)
+       4. lecture_spontanee (envie_lire >= seuil + inactif + délai min)
+   - Nouvelle méthode lecture_spontanee() :
+       * appelle self._lire() (callback)
+       * affiche le texte via _parler()
+       * retourne {"titre":..., "extrait":...}
+   - reset_apres_sommeil() : réinitialise aussi derniere_lecture
+
+7. nyx/intentions.py — MIS À JOUR
+   ----------------------------------------------------------------
+   - Nouveaux tuples :
+       * DECLENCHEURS_ARCHIVE
+       * DECLENCHEURS_LIRE_DOC
+       * DECLENCHEURS_LISTER_DOC
+   - detecter() teste dans l'ordre :
+       1. DECLENCHEURS_LIRE_DOC    → _extraire_lire_document()
+       2. DECLENCHEURS_LISTER_DOC  → Intention("lister_documents")
+       3. DECLENCHEURS_ARCHIVE     → Intention("archive")
+       4. DECLENCHEURS_DOC         → _extraire_document()
+       5. DECLENCHEURS_AGENDA      → _extraire_agenda()
+   - _extraire_lire_document() : liste les docs existants, demande au LLM
+     d'identifier lequel lire (JSON strict)
+
+8. nyx/agent.py — MIS À JOUR (V21)
+   ----------------------------------------------------------------
+   - Import random
+   - self.archives créé AVANT self.consolidation et self.reves
+   - Consolidation reçoit archives= et sur_evenement=
+   - Pulsions reçoit lire=self._lire_spontanement
+   - 7 méthodes publiques archives (archiver_note, lire_archive,
+     lister_archives, chercher_archives, supprimer_archive, stats_archives,
+     purger_archives_si_necessaire)
+   - _archiver_conversation() pour l'intention "archive"
+   - _lire_document(intention) : lecture par nom / recherche / plus récent
+   - _lister_documents() : liste lisible pour le chat
+   - _lire_spontanement() : callback utilisé par Pulsions
+   - _traiter_intention() : branches "archive", "lire_document",
+     "lister_documents"
+   - _afficher_etat_demarrage() : lignes Archives + Boucles archives/rêves
+     + Lecture spontanée
+   - afficher_pulsions() : affiche l'envie de lire
+   - COMMANDES_AIDE : ajoute "archives", "archiver <titre> | <contenu>",
+     "lire <id>", "lire_doc <nom>"
+   - lancer_simulation() : actions "archives", "lire_doc <nom>",
+     "archiver <titre> | <contenu>", "lire <id>"
+   - _regler_auto() : active/désactive aussi lecture_auto_actif
+
+9. nyx_gui.py — MIS À JOUR (V21)
+   ----------------------------------------------------------------
+   - Couleurs TEAL / TEAL_FONCE
+   - NAV : ajout "archives" (entre dissonances et etat)
+            ajout "documents" (entre archives et etat)
+   - Onglet 🗜️ Archives :
+       * Barre supérieure (Nouvelle note / Exporter tout / Actualiser)
+       * Carte stats (barre progression + compteur notes/Go/%)
+       * Liste scrollable avec cartes
+   - Onglet 📚 Documents :
+       * Liste scrollable des documents
+       * Bouton "Relire un document (spontané)"
+       * Bouton Lire par document
+   - 5 méthodes archives : charger_archives, _apres_archives,
+     action_archiver_note, action_lire_archive, action_supprimer_archive,
+     action_exporter_archives
+   - 3 méthodes documents : charger_documents, _apres_documents,
+     action_lire_document, action_lecture_spontanee
+   - Bouton chat btn_archives (🗜️) après btn_diss
+   - Bouton chat btn_docs (📚) après btn_archives
+   - Carte Archives + Carte Documents dans l'onglet État
+   - Jauge "📖 Envie de lire" dans chat et état
+   - Carte Documents dans les stats de l'onglet État
+   - Événement "lecture_spontanee" (bulle bleue + toast)
+   - Légende "lecture_spontanee" dans LEGENDES_SPONTANEES
+   - Raccourci Ctrl+L → onglet Documents
+   - Raccourci Ctrl+A → onglet Archives
+   - Réglage lecture_auto_actif (case à cocher)
+   - Curseur SEUIL_ENVIE_LIRE dans les réglages pulsions
+   - Restauration des réglages archives/documents au démarrage
+   - Message d'accueil mentionne archives et documents
+
+
+================================================================================
+📊 ÉTAT GLOBAL DES MODULES
+================================================================================
+
+Module                  État           Dernière livraison
+----------------------  -------------  ------------------------
+config.py               ✅ À JOUR      (V10, livré complet)
+archives.py             ✅ À JOUR      (V1, livré complet)
+boucles_archives.py     ✅ À JOUR      (livré complet)
+agent.py                ✅ À JOUR      (V21, livré complet)
+intentions.py           ✅ À JOUR      (V2, livré complet)
+nyx_gui.py              ✅ À JOUR      (V21, livré complet)
+dissonance.py           ✅ À JOUR
+reves.py                ✅ À JOUR      (V20, fragment prioritaire)
+consolidation.py        ✅ À JOUR      (V20, boucles archives)
+pulsions.py             ✅ À JOUR      (V21, envie de lire)
+memoire.py              ✅ À JOUR
+journal.py              ✅ À JOUR
+limbique.py             ✅ À JOUR
+llm.py                  ✅ À JOUR
+embeddings.py           ✅ À JOUR
+voix.py                 ✅ À JOUR      (Piper)
+documents.py            ✅ À JOUR
+agenda.py               ✅ À JOUR      (fix datetime/float)
+check.py                ✅ À JOUR
+
+
+================================================================================
+🧪 TESTS À FAIRE APRÈS INTÉGRATION
+================================================================================
+
+1. Démarrage de Nyx (nyx_gui.py)
+   → Vérifier que les onglets 🗜️ Archives et 📚 Documents sont présents
+   → Vérifier "[Nyx] 🟢 Archives : 0 note(s) · 0.00 Go / 1.0 Go (0.0 %)"
+   → Vérifier "[Nyx] 📖 Boucles archives/rêves : ON (budget 3/h)"
+   → Vérifier "[Nyx] 📖 Lecture spontanée : ON (seuil 55%, 0 document(s))"
+
+2. Test manuel d'archivage
+   → Cliquer "➕ Nouvelle note"
+   → Titre : "Test compression"
+   → Contenu : "Ceci est une note de test."
+   → La note doit apparaître dans la liste
+   → Cliquer "📖 Lire" → doit afficher le contenu décompressé
+   → Cliquer "🗑️ Supprimer" → confirmation + suppression
+
+3. Test d'intention dans le chat (archives)
+   → Envoyer un message à Nyx
+   → Envoyer "Archive ça"
+   → Nyx doit archiver sa dernière réponse
+   → Le message de retour doit mentionner le gain de compression
+
+4. Test d'intention dans le chat (documents)
+   → Envoyer "écris-moi un document sur la philosophie antique"
+   → Envoyer "lis ton document sur la philosophie"
+   → Nyx doit relire le document et en donner un aperçu
+   → Envoyer "quels documents as-tu écrits ?"
+   → Nyx doit lister ses documents
+
+5. Test des boucles autour des rêves
+   → Créer une note d'archive ("Test rêve")
+   → Cliquer "💤 Dormir" (ou "🌙 Rêver")
+   → Vérifier dans la console :
+       "[Nyx] 📖 Avant de rêver, je relis une note d'archive…"
+       "[Nyx] 🗜️ N rêve(s) archivé(s) en note compressée."
+   → Vérifier que le rêve 1 contient "📖 Note relue avant le rêve : ..."
+   → Vérifier que les archives contiennent les rêves (type "reve")
+
+6. Test de la lecture spontanée
+   → Créer un document via "écris-moi un document sur…"
+   → Cliquer "📖 Relire un document (spontané)"
+   → Vérifier la bulle bleue "📖 Nyx · relit un document"
+   → Attendre (ou modifier SEUIL_ENVIE_LIRE + DELAI) pour voir la lecture
+     se déclencher seule après inactivité
+
+7. Test de purge des archives
+   → Ajouter plusieurs notes (> 1 Go au total, si possible)
+   → Vérifier que les plus anciennes sont supprimées automatiquement
+   → Le compteur doit rester ≤ 100 %
+
+8. Test d'export
+   → Cliquer "📤 Exporter tout"
+   → Choisir un dossier
+   → Vérifier que les .txt sont créés (décompressés)
+
+9. Tests existants à relancer
+   → pytest tests/ (ne pas casser les tests existants)
+   → Vérifier que test_sommeil_ameliore, test_reves_etanches,
+     test_trace_reponses passent toujours
+
+
+================================================================================
+⚠️ POINTS D'ATTENTION
+================================================================================
+
+- L'onglet Archives utilise un dossier séparé "archives/"
+  (pas dans cerveau_memories/) pour ne pas compter dans la limite
+  mémoire de 2 Go.
+
+- Le plafond archives (1 Go) est INDÉPENDANT du plafond mémoire (2 Go).
+  Total projet = ~743 Mo (venv) + 2 Go (cerveau_memories max)
+                + 1 Go (archives max) + documents (négligeable)
+                = ~3.7 Go → sous les 5 Go cible ✅
+
+- La purge des archives est AGGRESSIVE : elle supprime les plus anciennes
+  sans archivage secondaire. C'est voulu (les .cpk sont déjà des archives).
+
+- Si l'utilisateur ajoute une note avec un titre vide, l'API lève
+  ValueError → l'interface affiche un toast.
+
+- Le démon de dissonance et les archives sont INDÉPENDANTS :
+  une note archivée n'est pas un souvenir, elle n'est pas rappelée
+  par la mémoire sémantique.
+
+- Les boucles autour des rêves sont DÉSACTIVABLES via
+  cfg.archives_reves_actif = False. Si désactivées, aucun impact sur
+  le sommeil.
+
+- La lecture de documents est DÉSACTIVABLE via
+  cfg.lecture_auto_actif = False. Si désactivée, seules les lectures à
+  la demande (chat/interface) fonctionnent.
+
+- Le fragment prioritaire (note relue avant le rêve) est injecté en tête
+  des fragments de rêve, puis consommé (remis à None). Il ne persiste pas
+  entre deux rêves.
+
+- Le budget horaire des boucles d'archives (3/heure par défaut) évite
+  la saturation. Anti-doublon par timestamp de rêve.
+
+- Les lectures spontanées sont limitées par DELAI_MIN_LECTURE (300 s par
+  défaut) pour ne pas saturer la voix.
+
+
+================================================================================
+🎯 PROCHAINE ACTION IMMÉDIATE
+================================================================================
+
+Tous les fichiers sont livrés. Prochaines étapes :
+
+1. Exécuter les tests (voir section 🧪 ci-dessus).
+2. Corriger les éventuels bugs remontés par les tests.
+3. Mettre à jour la note technique avec les nouveaux mécanismes
+   (Boucles d'archives, Pulsion "envie de lire", Lecture de documents).
+
+
+================================================================================
+📝 CHANGELOG
+================================================================================
+
+V19 → V20 :
+  - Intégration complète du module Archives compressées
+  - Boucles d'archives autour des rêves (lecture avant, archivage après)
+
+V20 → V21 :
+  - Ajout de la lecture de documents par Nyx
+  - Ajout de la pulsion "envie de lire"
+  - Lectures spontanées de documents
+  - Intents "lire_document" et "lister_documents"
+  - Configuration V10 (SEUIL_ENVIE_LIRE, ENVIE_LIRE_PAR_MINUTE, etc.)
+
+
+================================================================================
+Fin de la note de suivi
+Nyx V21 — Xavier, 2026
+================================================================================

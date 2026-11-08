@@ -1,0 +1,27 @@
+{
+ "version": 1,
+ "evenements": [
+  {
+   "id": "8b3974e6",
+   "titre": "Appeler maman",
+   "date": "2026-10-10",
+   "heure": "18:00",
+   "duree_min": 60,
+   "description": "",
+   "rappel_min": 15,
+   "cree_le": "2026-10-09 18:28:23",
+   "rappele_le": ""
+  },
+  {
+   "id": "69aa2a34",
+   "titre": "Tester l'agenda",
+   "date": "2026-10-11",
+   "heure": "",
+   "duree_min": 60,
+   "description": "",
+   "rappel_min": 15,
+   "cree_le": "2026-10-11 04:25:44",
+   "rappele_le": ""
+  }
+ ]
+}

@@ -1,0 +1,841 @@
+================================================================================
+   NYX — NOTE TECHNIQUE DÉTAILLÉE
+   Architecture, mécanismes et fondements
+   Xavier · 2026 · V21
+================================================================================
+
+
+TABLE DES MATIÈRES
+--------------------------------------------------------------------------------
+1.  Vue d'ensemble
+2.  Fondements théoriques
+3.  Architecture modulaire
+4.  Mécanisme 1  — La mémoire synaptique
+5.  Mécanisme 2  — Le système limbique VAD
+6.  Mécanisme 3  — Le rappel congruent à l'humeur
+7.  Mécanisme 4  — Les pulsions et l'horloge interne
+8.  Mécanisme 5  — Le sommeil et la consolidation
+9.  Mécanisme 6  — Les rêves (REM) + boucles d'archives
+10. Mécanisme 7  — Les embeddings nomic
+11. Mécanisme 8  — Le journal et l'identité
+12. Mécanisme 9  — Le pipeline conversationnel
+13. Mécanisme 10 — Le démon de dissonance
+14. Mécanisme 11 — Les archives compressées
+15. Mécanisme 12 — La lecture de documents et l'envie de lire
+16. La voix (Piper TTS)
+17. Les tests et la validation
+18. Dépendances techniques
+19. Empreinte du projet
+20. Limites connues
+21. Pistes d'évolution
+
+
+================================================================================
+1. VUE D'ENSEMBLE
+================================================================================
+
+Nyx n'est pas un simple wrapper autour d'un LLM. C'est un système multi-couches
+où le modèle de langage n'est qu'un composant parmi d'autres. Son comportement
+émerge de l'interaction entre plusieurs sous-systèmes :
+
+  - une mémoire persistante avec oubli et consolidation ;
+  - un état émotionnel continu (modèle VAD) ;
+  - une horloge biologique simulée (fatigue, sommeil, pensées, envie de lire) ;
+  - un journal intime qui forge une identité narrative ;
+  - des rêves générés par recombinaison de souvenirs (REM) ;
+  - un démon auto-actif qui détecte et résout les conflits internes ;
+  - un système d'archives compressées avec plafond et purge auto ;
+  - des boucles narratives autour des rêves (lecture avant, archivage après) ;
+  - une lecture de documents à la demande et spontanée ;
+  - une voix française naturelle (Piper TTS) ;
+  - une couche d'intentions qui détecte les actions à effectuer.
+
+Le LLM (Qwen 2.5:3b) est utilisé comme moteur de génération et analyseur
+sémantique, mais ce n'est PAS lui qui décide de la structure de la mémoire,
+de l'humeur, du sommeil, des rêves, des archives ou des résolutions de
+dissonance. Ces décisions sont algorithmiques et déterministes.
+
+Principes clés :
+  - local : tout tourne sur la machine, sans cloud ;
+  - léger : ~750 Mo au total (sous les 5 Go cible) ;
+  - modulaire : 16 modules indépendants, testés ;
+  - prouvé : 3 tests de validation (5 preuves, 4 contrôles, 6 contrôles) ;
+  - sécurisé : le démon de dissonance démarre en simulation par défaut.
+
+
+================================================================================
+2. FONDEMENTS THÉORIQUES
+================================================================================
+
+2.1 Neurosciences cognitives
+
+  Concept                     Inspiration                Implémentation Nyx
+  --------------------------  -------------------------  ------------------------
+  Mémoire synaptique          Potentiation à long terme  force_base + decay
+  Hippocampe                  Consolidation au sommeil   Module Consolidation
+  Amygdale                    Charge émotionnelle        SEUIL_CHARGE_EMOTIONNELLE
+  Système limbique            Modèle PAD (Mehrabian)     Module Limbique (VAD)
+  Pulsions homéostatiques     Faim, sommeil, curiosité   Module Pulsions (+ envie
+                                                         de lire)
+  Sommeil paradoxal (REM)     Activation-synthèse        Module Reves
+  Hypofrontalité en REM       Cortex préfrontal atténué  Prompt "pas de jugement"
+  Acétylcholine en REM        Génératif surexprimé       Température dynamique
+  Conflict monitoring (ACC)   Détection de conflits      Module Dissonance
+  Dissonance cognitive        Festinger (1957)           Démon auto-actif
+  Relecture active            Rehearsal (mémoire)        Relecture de docs +
+                                                         notes archivées
+
+2.2 Psychologie cognitive
+
+  - Rappel congruent à l'humeur (Bower, 1981) : l'humeur actuelle biaise
+    l'accès aux souvenirs. Un individu triste se souvient plus facilement de
+    souvenirs tristes.
+  - Consolidation systémique (McGaugh, 2000) : les souvenirs émotionnellement
+    forts sont préservés au détriment des souvenirs neutres.
+  - Oubli actif : l'élimination des souvenirs faibles est un processus
+    biologique normal, pas un dysfonctionnement.
+  - Recombinaison onirique : les rêves réassemblent des fragments de
+    souvenirs vécus en scènes nouvelles.
+  - Dissonance cognitive (Festinger, 1957) : un état de tension interne
+    causé par des représentations incompatibles. Le système cherche à la
+    réduire par 4 leviers.
+  - Rehearsal (répétition mentale) : la relecture spontanée de ses propres
+    écrits renforce la mémoire et l'identité narrative.
+
+2.3 Informatique
+
+  - Embeddings vectoriels (Mikolov 2013, Devlin 2018) : représentation continue
+    du sens dans un espace à haute dimension.
+  - Recherche par plus proches voisins approximatifs (HNSW) : algorithme
+    utilisé par ChromaDB pour des recherches sémantiques rapides.
+  - Compression adaptative : choix dynamique de l'algorithme (store/zlib/
+    bz2/lzma/lzma_delta) selon l'extension et le contenu.
+  - Format binaire maison .cpk : en-tête minimal (magic + algo + tailles).
+  - Traitement événementiel : les pulsions et le démon de dissonance tournent
+    dans des threads séparés.
+  - TTS local : Piper (moteur neuronal léger, CPU uniquement).
+  - Intégrateur à fuite : modèle de décision utilisé par le démon
+    (dD/dt = -λ·D + conflit(t)).
+
+
+================================================================================
+3. ARCHITECTURE MODULAIRE
+================================================================================
+
+Nyx est organisé en 16 modules indépendants, chacun avec une responsabilité
+unique. Aucun module n'a de dépendance circulaire ; les dépendances sont
+injectées en paramètre (injection de dépendances).
+
+
+                        INTERFACE UTILISATEUR
+             nyx_gui.py (customtkinter)  |  CLI (agent.py)
+                                 |
+                                 v
+                          ORCHESTRATEUR
+                        AgentCerebralNyx
+              Pipeline, intentions, feedback, check
+                                 |
+       +---------+---------+---------+---------+---------+
+       |         |         |         |         |         |
+       v         v         v         v         v         v
+    Config     LLM     Embed    Limbique  Mémoire   Journal
+       |                              |         |
+       |                              v         v
+       |                          ChromaDB    Reves
+       |                                       |
+       v                                       v
+    Voix (Piper)             Consolidation / Dissonance / Archives
+                                           |         |
+                                           v         v
+                                       Pulsions   BouclesArchives
+
+
+3.1 Rôle de chaque module
+
+  config.py             Configuration centralisée (90+ paramètres validés)
+  llm.py                Client Ollama (streaming, timeout, annulation, retry)
+  embeddings.py         Embeddings via nomic-embed-text (préfixes, cache LRU)
+  limbique.py           Système émotionnel VAD
+  memoire.py            Mémoire long terme (Chroma + decay + archive + onirique)
+  journal.py            Journal intime (identité, réflexions, rêves, dissonances)
+  pulsions.py           Horloge interne (fatigue, sommeil, pensées, envie de lire)
+  consolidation.py      Sommeil (tri, oubli, consolidation, apaisement, rêves)
+  reves.py              Rêves REM (3 phases, T dynamique, fragment prioritaire)
+  dissonance.py         Démon auto-actif de résolution des conflits internes
+  archives.py           Notes compressées .cpk (plafond 1 Go, purge auto)
+  boucles_archives.py   Boucles autour des rêves (lecture avant, archivage après)
+  voix.py               Voix Piper (TTS local)
+  intentions.py         Détection d'intentions (document, agenda, archive,
+                        lire_document, lister_documents)
+  documents.py          Écriture et lecture de documents .txt
+  agenda.py             Événements et rappels
+  check.py              Auto-diagnostic
+  agent.py              Orchestrateur
+
+3.2 Communication
+
+  - Communication inter-thread via queue.Queue (thread-safe).
+  - Aucune variable globale mutable partagée sans verrou.
+  - Verrous RLock pour les accès concurrents à Chroma, à l'humeur et aux
+    archives.
+  - Les modules reçoivent leurs dépendances via le constructeur.
+  - Le démon de dissonance et les boucles d'archives partagent le verrou de
+    l'agent (RLock).
+
+
+================================================================================
+4. MÉCANISME 1 — LA MÉMOIRE SYNAPTIQUE
+================================================================================
+
+(Inchangé par rapport à la V19 — voir §4.1 à §4.4 de la note précédente.)
+
+  Structure d'un souvenir, force effective (decay paresseux), catégories
+  (marquant/concept/onirique/brut/faible), renforcement par Hebb.
+
+  Rappel clé :
+    force_effective = force_base × exp(-taux × heures_depuis_dernier_acces)
+    taux = TAUX_DECAY × facteur
+    facteur = 0.3 (marquants/concepts), 0.5 (oniriques), 1.0 (bruts)
+
+
+================================================================================
+5. MÉCANISME 2 — LE SYSTÈME LIMBIQUE VAD
+================================================================================
+
+(Inchangé par rapport à la V19.)
+
+  Modèle PAD : valence (-1..+1), activation (0..1), dominance (0..1).
+  Lissage à 0.7/0.3, amortissement à 0.95, retour au neutre via TAU_EMOTION.
+  11 émotions classées, instruction de ton injectée dans le prompt.
+
+
+================================================================================
+6. MÉCANISME 3 — LE RAPPEL CONGRUENT À L'HUMEUR
+================================================================================
+
+(Inchangé par rapport à la V19.)
+
+  ChromaDB retourne N candidats, puis bonus d'humeur :
+    intensite  = |valence_humeur| × (0.5 + 0.5 × activation_humeur)
+    congruence = 1 - |valence_souvenir - valence_humeur| / 2
+    bonus      = POIDS_HUMEUR × intensite × congruence
+    score      = distance_chroma - bonus
+  Tri par score croissant, filtre SEUIL_DISTANCE.
+
+
+================================================================================
+7. MÉCANISME 4 — LES PULSIONS ET L'HORLOGE INTERNE
+================================================================================
+
+7.1 Concept biologique
+
+Un organisme vivant a des pulsions homéostatiques :
+  - la faim augmente avec le temps sans manger ;
+  - le sommeil s'impose après une veille prolongée ;
+  - l'envie de lire / de découvrir monte quand on est inactif.
+
+Nyx simule TROIS pulsions : la fatigue, l'envie de réfléchir et l'envie de
+lire.
+
+7.2 La fatigue
+
+  fatigue = min(1.0,
+      charge_msgs × FATIGUE_PAR_MESSAGE          # 0.05 par échange
+      + minutes_eveil × FATIGUE_PAR_MINUTE       # 0.004 par minute
+      + FATIGUE_MEMOIRE × part_faibles           # 0.3 × fraction de faibles
+  )
+
+7.3 L'envie de réfléchir
+
+  envie = min(1.0,
+      minutes_sans_pensee × ENVIE_PAR_MINUTE     # 0.02 par minute
+      + ENVIE_DECLIN × part_declin               # 0.5 × fraction en déclin
+  )
+
+7.4 L'envie de lire (NOUVEAU V21)
+
+  envie_lire = min(1.0,
+      minutes_sans_lecture × ENVIE_LIRE_PAR_MINUTE   # 0.03 par minute
+  )
+
+Interprétation :
+  - L'envie de lire monte simplement avec le temps passé sans lire.
+  - Ne dépend PAS de l'état de la mémoire : c'est une curiosité pure.
+  - Seuil par défaut : SEUIL_ENVIE_LIRE = 0.55 (55 %).
+
+7.5 Le tick (un battement)
+
+Un thread d'arrière-plan exécute un tick toutes les 5 secondes :
+
+  1. Dériver l'humeur (auto-decay temporel)
+  2. Recalculer les 3 pulsions
+  3. Émettre les rappels d'agenda dus
+  4. Déclencher AU PLUS UNE action, dans cet ordre de priorité :
+     a. S'endormir          (fatigue >= SEUIL_SOMMEIL_AUTO ET inactif)
+     b. Annoncer fatigue    (une seule fois par cycle)
+     c. Penser à voix haute (envie >= SEUIL_REFLEXION ET inactif ET délai)
+     d. Lire spontanément   (envie_lire >= SEUIL_ENVIE_LIRE ET inactif ET délai)
+
+  Contrainte d'unicité : Nyx ne fait qu'UNE action spontanée à la fois.
+
+7.6 Seuils par défaut
+
+  SEUIL_ENVIE_DORMIR         = 0.60   Nyx dit qu'elle a sommeil
+  SEUIL_SOMMEIL_AUTO         = 0.85   Nyx s'endort seule
+  SEUIL_REFLEXION            = 0.60   Nyx pense à voix haute
+  SEUIL_ENVIE_LIRE           = 0.55   Nyx relit un document          ← NOUVEAU
+  DELAI_INACTIVITE_SOMMEIL   = 45 s
+  DELAI_INACTIVITE_REFLEXION = 25 s
+  DELAI_INACTIVITE_LECTURE   = 40 s                                  ← NOUVEAU
+  DELAI_MIN_REFLEXION        = 180 s
+  DELAI_MIN_LECTURE          = 300 s                                 ← NOUVEAU
+
+
+================================================================================
+8. MÉCANISME 5 — LE SOMMEIL ET LA CONSOLIDATION
+================================================================================
+
+(Inchangé sur le fond, mais la phase REM a été enrichie — voir §9.)
+
+  Phases NREM :
+    1. Tri de la mémoire
+    2. Oubli actif des souvenirs faibles
+    3. Consolidation des neutres en concepts (LLM)
+    4. Apaisement émotionnel (transition vers REM)
+
+  Phases REM :
+    5. Rêves (voir §9)
+
+
+================================================================================
+9. MÉCANISME 6 — LES RÊVES (REM) + BOUCLES D'ARCHIVES
+================================================================================
+
+9.1 Inspiration neuroscientifique
+
+  - Modèle de Hobson (activation-synthèse) : le cerveau en REM génère des
+    scènes à partir de souvenirs fragmentaires.
+  - Free Energy Principle (Friston).
+  - Hypofrontalité (cortex préfrontal atténué) : "pas de jugement".
+  - Acétylcholine élevée : génération d'images vives.
+
+9.2 Cycle complet (3 phases, T dynamique)
+
+  Phase    Température (rêve 1 / rêve 2)   Tokens   Rôle
+  -------  ------------------------------  -------  --------------------------
+  Début    0.8 / 0.9                       250      Ancrage narratif
+  Milieu   1.0 / 1.1                       300      Exploration surréaliste
+  Fin      0.7 / 0.8                       200      Retour à la cohérence
+
+9.3 Sélection des fragments
+
+  - 60 % des plus récents (max 3)
+  - 30 % des marquants (max 2)
+  - 10 % des plus anciens (max 1)
+  + 1 fragment prioritaire (note relue) si défini   ← NOUVEAU V20
+
+9.4 Boucle 1 : Lecture aléatoire AVANT le rêve (NOUVEAU V20)
+
+  Avant chaque cycle REM, si cfg.archives_reves_actif est True et qu'il
+  existe des notes archivées :
+
+    1. BouclesArchives.avant_reve() tire une note au hasard.
+    2. Lit le contenu décompressé (tronqué à 400 caractères).
+    3. Retourne le texte ; Consolidation l'injecte via
+       self.reves.fragment_prioritaire = note_relue.
+    4. ModuleReves.selectionner_fragments() l'injecte en PREMIER dans la
+       liste, préfixé "📖 Note relue avant le rêve : ...".
+    5. Le fragment prioritaire est consommé (remis à None).
+
+  Effet narratif : continuité entre les archives et les rêves. Nyx "relit"
+  un fragment de son passé avant de rêver.
+
+9.5 Boucle 2 : Archivage automatique APRÈS le rêve (NOUVEAU V20)
+
+  Après le cycle REM, si cfg.archives_reves_actif est True et qu'il y a
+  au moins un rêve :
+
+    1. BouclesArchives.apres_reve(liste_reves) itère sur les rêves.
+    2. Pour chaque rêve marquant (delta valence/activation OU mots-clés
+       forts), crée une note d'archive type "reve" avec tags ["reve",
+       "auto", "T<temperature>"].
+    3. Garde-fous :
+         * budget horaire (3 archives de rêve/heure par défaut)
+         * anti-doublon (par timestamp de rêve)
+         * erreurs silencieuses (ne casse jamais le sommeil)
+
+9.6 Impact sur l'humeur
+
+  Après génération, l'humeur est modifiée selon le contenu :
+    - Mots négatifs dominants → valence baisse, activation monte
+    - Mots positifs dominants → valence monte, activation monte
+    - Neutre → activation monte légèrement
+
+9.7 Mémorisation onirique
+
+  Un rêve marquant (charge >= 0.5) devient un souvenir onirique
+  (type "souvenir_onirique", force 0.7, facteur decay 0.5×).
+
+9.8 Étanchéité prouvée
+
+  Test test_reves_etanches : 3/3 souvenirs vécus intacts, 2/2 rêves typés
+  onirique, zéro contamination.
+
+
+================================================================================
+10. MÉCANISME 7 — LES EMBEDDINGS NOMIC
+================================================================================
+
+(Inchangé par rapport à la V19.)
+
+  Modèle nomic-embed-text via Ollama, 768 dimensions.
+  Préfixes obligatoires : "search_document: " / "search_query: ".
+  Cache LRU 2048 entrées.
+  Vérification de cohérence dimensionnelle au démarrage.
+
+
+================================================================================
+11. MÉCANISME 8 — LE JOURNAL ET L'IDENTITÉ
+================================================================================
+
+(Inchangé sur le fond, avec 4 nouveaux types d'entrées.)
+
+  Types d'entrées :
+    - "interaction"        : conversation normale
+    - "feedback_positif"   : retour positif
+    - "feedback_negatif"   : retour négatif
+    - "reve"               : rêve
+    - "reveil"             : fin de sommeil
+    - "auto_reflexion"     : pensée spontanée
+    - "document_ecrit"     : rédaction
+    - "document_lu"        : lecture à la demande        ← NOUVEAU V21
+    - "lecture_spontanee"  : lecture spontanée           ← NOUVEAU V21
+    - "agenda_ajout"       : nouvel événement
+    - "dissonance"         : résolution de conflit interne
+    - "archive_ecrite"     : note archivée               ← NOUVEAU V20
+    - "manuel"             : ajout manuel
+
+  Anti-doublon via distance Chroma (SEUIL_DOUBLON_JOURNAL).
+  Identité récente injectée dans chaque prompt système.
+  Catchup identitaire au démarrage (5 dernières entrées relues).
+
+
+================================================================================
+12. MÉCANISME 9 — LE PIPELINE CONVERSATIONNEL
+================================================================================
+
+12.1 Les 7 étapes
+
+  1. Signal             → Nettoyage du texte
+  2. Filtre émotionnel  → Analyse VAD du message, mise à jour de l'humeur
+  3. Intention          → Document ? Agenda ? Archive ? Lire doc ? Lister docs ?
+                          (court-circuit possible)
+  4. Décodage mnésique  → Recherche sémantique + filtre humeur
+  5. Cortex préfrontal  → Génération d'un plan interne (LLM)
+  6. Décision           → Appel LLM avec contexte complet
+  7. Comportement       → Mémorisation du stimulus + journal éventuel
+
+12.2 Détection d'intentions (ordre de priorité)
+
+  1. DECLENCHEURS_LIRE_DOC   → "lis ton document…", "qu'as-tu écrit sur…"
+  2. DECLENCHEURS_LISTER_DOC → "quels documents", "liste tes documents"
+  3. DECLENCHEURS_ARCHIVE    → "archive ça", "sauvegarde ça"
+  4. DECLENCHEURS_DOC        → "écris-moi", "rédige"
+  5. DECLENCHEURS_AGENDA     → "rappelle-moi", "note dans mon agenda"
+
+  Si détecté, on court-circuite le pipeline normal pour lancer l'action
+  dédiée.
+
+12.3 Gestion des erreurs LLM
+
+  try:
+      reponse = self.llm.chat(messages)
+  except Exception as e:
+      self.memoire_de_travail.pop()   # N'empoisonne pas l'historique
+      return f"[Erreur : {e}]"
+
+
+================================================================================
+13. MÉCANISME 10 — LE DÉMON DE DISSONANCE
+================================================================================
+
+(Inchangé par rapport à la V19.)
+
+  Modèle mathématique : énergie E, conflit instantané C, intégrateur à fuite
+  dD/dt = -λ·D + conflit(t), résolution par descente de gradient.
+  4 leviers de résolution (Festinger). Mode simulation par défaut.
+  Garde-fous : seuil, budget horaire, intervalle min, pause.
+
+
+================================================================================
+14. MÉCANISME 11 — LES ARCHIVES COMPRESSÉES (NOUVEAU V20)
+================================================================================
+
+14.1 Vue d'ensemble
+
+  Module indépendant nyx/archives.py. Dossier "archives/" séparé de
+  cerveau_memories/ (ne compte pas dans la limite mémoire de 2 Go).
+
+  Deux fichiers par note :
+    - Un fichier .cpk (contenu compressé, binaire)
+    - Une entrée dans archives/index.json (métadonnées)
+
+14.2 Format .cpk
+
+  [4 octets magic "CPK\x02"]
+  [1 octet  algo_id]         ← 0=store, 1=zlib, 2=bz2, 3=lzma, 4=lzma_delta
+  [8 octets taille originale] ← big-endian
+  [4 octets taille du nom]    ← big-endian
+  [n octets nom UTF-8]
+  [données compressées]
+
+14.3 Classification media-smart
+
+  ALREADY_COMPRESSED (jpg, mp4, zip, pdf…)  → store
+  UNCOMPRESSED_MEDIA (wav, bmp, raw…)       → lzma_delta
+  TEXT_LIKE (txt, md, py, json…)            → lzma
+  Autre                                     → auto (teste zlib, bz2, lzma)
+
+  Si la compression n'apporte rien (compressed >= orig), bascule sur store.
+
+14.4 API publique
+
+  - ecrire_note(titre, contenu, type_note, tags) → dict {note, purge}
+  - lire_note(id_note) → str | None
+  - lister(filtre, tri) → list[dict]
+  - chercher(mot_cle) → list[dict]
+  - supprimer(id_note) → bool
+  - purger_jusqua_limite() → dict
+  - stats() → dict
+  - exporter_tout(dossier) → dict
+
+14.5 Plafond et purge
+
+  - Plafond par défaut : cfg.archives_limite_go = 1.0 Go.
+  - Purge automatique à chaque ecrire_note() si total > limite.
+  - Cible : 90 % de la limite (marge de sécurité).
+  - Supprime les notes les plus anciennes (par date_creation).
+  - Agressive et volontaire : les .cpk sont déjà des archives.
+
+14.6 Intégration dans l'agent
+
+  - self.archives = Archives(cfg, dossier=cfg.archives_dossier)
+  - 7 méthodes publiques sur l'agent (archiver_note, lire_archive, etc.)
+  - _archiver_conversation() pour l'intention "archive"
+  - _afficher_etat_demarrage() affiche le compteur
+  - COMMANDES_AIDE et lancer_simulation() exposent les actions CLI
+  - Entrée journal type "archive_ecrite" à chaque archivage
+
+
+================================================================================
+15. MÉCANISME 12 — LA LECTURE DE DOCUMENTS ET L'ENVIE DE LIRE (NOUVEAU V21)
+================================================================================
+
+15.1 Vue d'ensemble
+
+  Trois modes de lecture pour Nyx :
+    1. Lecture à la demande (intention dans le chat)
+    2. Lecture à la demande (interface)
+    3. Lecture spontanée (pulsion "envie de lire")
+
+15.2 Lecture à la demande dans le chat
+
+  Déclencheurs (DECLENCHEURS_LIRE_DOC) :
+    "lis ton document", "lis le document", "relis ton document",
+    "qu'as-tu écrit sur", "montre-moi ton document", "ouvre ton document",
+    "lis ce que tu as écrit"
+
+  Détection : DetecteurIntention._extraire_lire_document()
+    - Liste les documents existants
+    - Demande au LLM d'identifier lequel lire (JSON strict)
+    - Fallback : prend le plus récent si le LLM échoue
+
+  Pipeline :
+    1. Intention "lire_document" détectée
+    2. Agent._lire_document(intention) appelé
+    3. Cherche par nom exact, sinon par sujet, sinon plus récent
+    4. Retourne un aperçu (800 caractères max)
+    5. Écrit une entrée journal "document_lu"
+    6. Mémorise "J'ai relu mon document X" (léger renforcement)
+    7. Prononce si voix active
+
+15.3 Listing de documents dans le chat
+
+  Déclencheurs (DECLENCHEURS_LISTER_DOC) :
+    "quels documents", "liste tes documents", "montre-moi tes documents",
+    "qu'as-tu écrit", "tes documents"
+
+  Pipeline :
+    1. Intention "lister_documents" détectée
+    2. Agent._lister_documents() appelé
+    3. Retourne une liste lisible (nom, taille, date)
+
+15.4 Lecture à la demande dans l'interface
+
+  - Onglet 📚 Documents : liste les documents avec bouton "📖 Lire"
+  - Bouton "📖 Relire un document (spontané)" dans le panneau chat
+  - Raccourci Ctrl+L → onglet Documents
+  - Chaque lecture ouvre une fenêtre texte avec le contenu complet
+
+15.5 Lecture spontanée (pulsion "envie de lire")
+
+  Compteur : envie_lire
+    envie_lire = min(1.0, minutes_sans_lecture × ENVIE_LIRE_PAR_MINUTE)
+
+  Déclenchement (dans Pulsions.tick()) :
+    - envie_lire >= SEUIL_ENVIE_LIRE (0.55)
+    - inactif >= DELAI_INACTIVITE_LECTURE (40 s)
+    - m - derniere_lecture >= DELAI_MIN_LECTURE (300 s)
+    - cfg.lecture_auto_actif = True
+    - Aucune action de priorité supérieure (sommeil, pensée)
+
+  Pipeline :
+    1. Pulsions.lecture_spontanee() appelé
+    2. Callback self._lire() → Agent._lire_spontanement()
+    3. Choisit un document au hasard parmi les 10 plus récents
+    4. Extrait 400 caractères (propre)
+    5. Écrit une entrée journal "lecture_spontanee"
+    6. Retourne {"titre":..., "extrait":...}
+    7. Pulsions affiche via _parler() → bulle bleue + toast
+    8. Prononce si voix active
+
+15.6 Garde-fous
+
+  - Budget : limité par DELAI_MIN_LECTURE (300 s entre deux lectures)
+  - Désactivable : cfg.lecture_auto_actif = False
+  - Priorité : le sommeil et les pensées passent avant
+  - Erreur silencieuse : si aucun document, retourne None sans crasher
+  - Voix optionnelle : si voix_pensees = False, pas de lecture audio
+
+15.7 Intégration interface
+
+  - Jauge "📖 Envie de lire" dans le panneau chat et dans l'onglet État
+  - Bulle bleue (teal) "📖 Nyx · relit un document" dans le chat
+  - Toast "📖 Nyx relit un de ses documents."
+  - Carte Documents dans l'onglet État (nombre + dernier document)
+  - Réglage "Lectures spontanées (relire un de ses documents)" dans
+    l'onglet Réglages
+  - Curseur SEUIL_ENVIE_LIRE dans les réglages pulsions
+
+15.8 Différence avec les archives
+
+  Documents                              Archives
+  ---------                              ---------
+  Fichiers .txt lisibles                 Fichiers .cpk compressés
+  Dossier "documents/"                   Dossier "archives/"
+  Pas de plafond                         Plafond 1 Go + purge auto
+  Écrits par Nyx via "écris-moi"         Créés par l'utilisateur ou auto
+  Lecture à la demande + spontanée       Lecture à la demande + auto autour
+                                          des rêves
+
+
+================================================================================
+16. LA VOIX (PIPER TTS)
+================================================================================
+
+(Inchangé par rapport à la V19.)
+
+  Piper (fr_FR-siwis-medium), léger, rapide, sans GPU.
+  Streaming : lecture séquentielle sans blanc.
+  Fallback : si Piper échoue, la voix reste silencieuse.
+  Prononce : réponses, pensées spontanées, rêves, lectures spontanées
+  (désactivable via voix_pensees).
+
+
+================================================================================
+17. LES TESTS ET LA VALIDATION
+================================================================================
+
+17.1 Tests automatisés
+
+  3 tests de validation critiques :
+
+  tests/test_sommeil_ameliore.py
+    → Vérifie que le sommeil consolide et protège (5 preuves)
+
+  tests/test_reves_etanches.py
+    → Vérifie que les rêves ne contaminent pas les souvenirs vécus
+
+  tests/test_trace_reponses.py
+    → Vérifie que Nyx garde trace de ses réponses
+
+17.2 Résultats observés (V19, à re-tester en V21)
+
+  ✅ Test sommeil : 5/5 preuves satisfaites
+  ✅ Test rêves : RÊVES ÉTANCHES
+  ✅ Test trace : TRACE OK
+
+17.3 Nouveaux tests à faire en V21
+
+  - test_archives.py (nouveau) : écriture, lecture, suppression, purge,
+    export
+  - test_boucles_archives.py (nouveau) : avant_reve, apres_reve, budget,
+    anti-doublon
+  - test_intentions.py (étendu) : archive, lire_document, lister_documents
+  - test_lecture_documents.py (nouveau) : _lire_document,
+    _lire_spontanement
+
+
+================================================================================
+18. DÉPENDANCES TECHNIQUES
+================================================================================
+
+(Inchangé par rapport à la V19.)
+
+  Python 3.10+
+  chromadb, ollama, customtkinter, piper-tts, sounddevice, pytest
+  qwen2.5:3b, nomic-embed-text:latest, fr_FR-siwis-medium.onnx
+
+  Collections Chroma :
+    - souvenirs_long_terme
+    - renforcement
+    - journal_intime_nyx
+    - dissonances_actives
+
+  Threads :
+    - Tk principal
+    - nyx-llm (streaming)
+    - nyx-pulsions (tick 5 s)
+    - nyx-demon-dissonance (tick 15 s)
+    - nyx-voix (synthèse et lecture Piper)
+
+
+================================================================================
+19. EMPREINTE DU PROJET
+================================================================================
+
+19.1 Taille disque
+
+  Dossier du projet (avec venv)     : ~750 Mo (vs 743 Mo en V19)
+  - venv                            : ~324 Mo
+  - models/ (Piper)                 : ~61 Mo
+  - sauvegardes/                    : ~7,6 Mo
+  - cerveau_memories/               : ~7,3 Mo
+  - archives/                       : variable (max 1 Go configuré)
+  - documents/                      : variable (généralement < 1 Mo)
+  - nyx/ (code)                     : ~400 Ko (+ ~60 Ko en V21)
+  - tests/                          : ~204 Ko
+  - logs/                           : ~48 Ko
+
+  Objectif initial : < 5 Go. Atteint : ~750 Mo (85 % d'économie).
+
+19.2 Hors projet (pour tourner)
+
+  Cache Ollama (modèles)            : ~2,2 Go (qwen2.5:3b + nomic)
+  Total pour tourner Nyx            : ~3 Go
+
+
+================================================================================
+20. LIMITES CONNUES
+================================================================================
+
+20.1 Limites techniques
+
+  Limite                              Impact
+  ----------------------------------  --------------------------------------
+  ChromaDB mono-processus             Pas de double instance en parallèle
+  Migration lente sur grosse base     250k souvenirs ≈ 30 min
+  Coût du changement d'embedding      Recalcul de tous les vecteurs
+  Streaming LLM non utilisé           Attente complète avant réponse
+  Qwen3-TTS non supporté              Voix Piper uniquement (choix taille)
+  Démon en simulation par défaut      Pas d'action réelle sans activation
+  Archives en purge aggressive        Pas d'archivage secondaire
+  Recherche dans les documents        Par sous-chaîne (pas de sémantique)
+  Recherche dans les archives         Titre + preview uniquement
+
+20.2 Limites conceptuelles
+
+  - Pas de mémoire épisodique structurée (qui, quoi, quand, où).
+  - Pas de mémoire procédurale (« comment faire »).
+  - Pas de théorie de l'esprit (modélisation des croyances utilisateur).
+  - Identité fixe (nom « Nyx » hardcodé).
+  - Monoutilisateur (une seule collection par instance).
+  - Pas de mémoire à court terme explicite (historique tronqué à 8 messages).
+  - Détection de dissonance limitée aux paires de souvenirs.
+  - Rêves limités à la recombinaison de souvenirs.
+  - Archives non indexées sémantiquement (seulement titre + preview).
+  - Documents indexés par sous-chaîne (pas par embedding).
+  - Lecture de documents : aperçu tronqué à 800 caractères (pas de lecture
+    intégrale dans le chat).
+  - Lecture spontanée : 1 document à la fois, extrait 400 caractères.
+
+20.3 Biais du LLM
+
+  (Inchangé par rapport à la V19.)
+
+
+================================================================================
+21. PISTES D'ÉVOLUTION
+================================================================================
+
+21.1 Court terme
+
+  - Test automatisé test_archives.py (écriture, lecture, purge, export)
+  - Test automatisé test_boucles_archives.py (avant_reve, apres_reve)
+  - Test automatisé test_lecture_documents.py (à la demande + spontanée)
+  - Page Documents : recherche dans les contenus
+  - Page Archives : filtres par type, recherche par tag
+  - Streaming UI : afficher la réponse mot par mot
+  - Dashboard : évolution de l'humeur sur 24h/7j/30j
+
+21.2 Moyen terme
+
+  - RAG sur les documents : Chroma dédiée pour recherche sémantique
+  - RAG sur les archives : idem
+  - Lecture intégrale dans le chat (avec pagination)
+  - Multi-profils : un utilisateur = une base Chroma
+  - Mémoire épisodique : structurer les souvenirs (qui, quoi, quand, où)
+  - Webhooks : appels HTTP pour intégration externe
+  - Dissonance étendue : croyances + objectifs + actions
+
+21.3 Long terme
+
+  - Multi-agents : faire dialoguer deux instances Nyx
+  - Mémoire procédurale : extraire des « recettes » des conversations
+  - Modèle local fine-tuné : LoRA sur les dialogues récurrents
+  - Version distribuée : base Chroma partagée sur réseau
+  - Reconnaissance vocale (Whisper, Vosk) : Nyx t'écoute
+  - Boucle de lecture/réflexion autonome : Nyx explore ses archives et ses
+    documents pendant l'inactivité, en tire des synthèses, les archive.
+
+
+================================================================================
+CONCLUSION
+================================================================================
+
+Nyx n'est pas « un LLM avec une base de données ». C'est un système
+cognitif où :
+
+  - Le LLM génère du texte ;
+  - La mémoire décide quoi garder, oublier, consolider ;
+  - L'humeur biaise ce qui est perçu et rappelé ;
+  - Les pulsions dictent quand parler, dormir, penser, lire ;
+  - Les rêves recombinent les souvenirs en scènes nouvelles, avec une
+    continuité narrative assurée par la relecture d'archives ;
+  - Le démon de dissonance résout les conflits internes ;
+  - Les archives conservent des notes compressées avec plafond et purge ;
+  - Les documents sont écrits, relus à la demande, et parfois relus
+    spontanément sous l'impulsion de l'envie de lire ;
+  - Le journal forge une identité continue ;
+  - L'orchestrateur coordonne.
+
+Son comportement émerge de ces interactions. C'est pour cela qu'elle semble
+parfois « vivante » : elle n'est pas pilotée par un script unique, mais par
+un ensemble de processus qui se contredisent parfois, se renforcent souvent,
+et évoluent dans le temps.
+
+Chiffres clés V21 :
+  - 16 modules indépendants
+  - ~750 Mo sur disque (hors modèles Ollama)
+  - 90+ paramètres configurables
+  - 3 tests de validation (5 preuves, 4 contrôles, 6 contrôles)
+  - 12 mécanismes cognitifs simulés
+  - 2 boucles d'archives autour des rêves
+  - 1 pulsion supplémentaire (envie de lire)
+  - 1 démon auto-actif avec garde-fous
+
+
+================================================================================
+Fin du document
+Nyx V21 — Xavier, 2026
+================================================================================

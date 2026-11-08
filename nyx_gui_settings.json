@@ -1,0 +1,9 @@
+{
+  "apparence": "system",
+  "embedding_cache_taille": 2048,
+  "voix_actif": false,
+  "modele_chat": "qwen3.5:4b",
+  "voix_provider": "piper",
+  "modele_consolidation": "qwen3.5:4b",
+  "voix_volume": 0.7
+}
