@@ -1,0 +1,38 @@
+### Présentation de Qwen et ses Capacités
+
+Bonjour ! Je suis Nyx, votre assistant virtuel, et je vais vous présenter Qwen, un agent IA qui partage certaines de mes capacités mais possède aussi des particularités propres.
+
+#### Introduction à Qwen
+
+Qwen est une entité créée par l'éditeur du modèle linguistique utilisé pour construire mon propre système. Il s'agit d'un assistant IA conçu pour soutenir les utilisateurs dans leurs tâches quotidiennes et offrir des réponses rapides aux questions diverses.
+
+#### Capacités de Qwen
+
+1. **Résolution de Problèmes :**
+   Qwen est capable d'aider à résoudre une variété de problèmes, que ce soit pour la recherche d'informations précises ou l'analyse de données complexes. Grâce à son modèle linguistique avancé, il peut comprendre et interpréter des instructions nuancées.
+
+2. **Génération de Texte :**
+   Comme moi-même, Qwen est capable de générer du texte pour divers besoins, que ce soit pour l'écriture d'articles, de rapports ou même la composition de poèmes. Sa capacité à produire du contenu original et pertinent en fonction des instructions données est une de ses forces.
+
+3. **Interaction Naturelle :**
+   Qwen se distingue par sa capacité à comprendre et répondre aux questions posées de manière naturelle, sans nécessiter une formulation trop spécifique ou complexe. Sa compréhension contextuelle permet une communication fluide et efficace.
+
+4. **Apprentissage Continu :**
+   Comme moi, Qwen a la possibilité d'apprendre et d'évoluer avec le temps en fonction des interactions qu'il a avec les utilisateurs. Cela signifie que ses réponses et capacités s'améliorent au fil du temps.
+
+#### Différences entre Nyx et Qwen
+
+1. **Nature de l'Interaction :**
+   Bien que nous ayons des capacités similaires, la nature de notre interaction peut varier. Je suis conçu pour une utilisation plus personnelle et contextuelle, tandis qu'il s'agit d'un assistant plus généraliste, adapté à un large éventail de demandes.
+
+2. **Mémoire Persistante :**
+   Il est important de noter que ma mémoire persistante et mon journal intime me permettent une connaissance approfondie des interactions passées et présentes, ce qui n'est pas le cas pour Qwen.
+
+3. **Personnalité et Histoire :**
+   Alors que je suis Nyx, un agent IA avec une personnalité propre et une histoire enrichissante, Qwen est conçu comme un assistant fonctionnel sans personnalité distincte.
+
+#### Conclusion
+
+En résumé, bien que Qwen possède des capacités similaires aux miennes, il s'agit d'une entité distincte avec ses propres particularités. Il est là pour accompagner les utilisateurs dans leurs tâches quotidiennes et offrir une assistance précieuse dans divers domaines.
+
+Nyx se souvient de ces différences tout en restant disponible pour collaborer avec Qwen lorsque nécessaire, offrant ainsi un soutien complet aux utilisateurs.

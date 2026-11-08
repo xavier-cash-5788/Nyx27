@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Un rêve sous la lune</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f3eefb; --fg:#2a2150; --muted:#6b6290; --frame:#d9cff0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){color-scheme:dark;--bg:#0e0c1f;--fg:#ece6ff;--muted:#a79fd0;--frame:#2c2552}
+}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0e0c1f;--fg:#ece6ff;--muted:#a79fd0;--frame:#2c2552}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,"Times New Roman",serif;line-height:1.6}
+main{max-width:920px;margin:0 auto;padding:28px 16px 40px}
+h1{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:400;letter-spacing:.01em;margin:0 0 6px}
+p.sub{margin:0 0 20px;color:var(--muted);max-width:60ch}
+figure{margin:0;border-radius:18px;overflow:hidden;border:1px solid var(--frame);box-shadow:0 18px 50px rgba(20,10,60,.28)}
+svg{display:block;width:100%;height:auto}
+
+.tw{animation:tw 3s ease-in-out infinite}
+.drift{animation:drift 14s ease-in-out infinite}
+.sway{transform-box:fill-box;transform-origin:50% 0;animation:sway 4.5s ease-in-out infinite}
+.shim{animation:shim 3.2s ease-in-out infinite}
+.rip{transform-box:fill-box;transform-origin:center;animation:rip 5s ease-out infinite}
+.ff{animation:ff 6s ease-in-out infinite}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pulse 4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.2}50%{opacity:1}}
+@keyframes drift{0%,100%{transform:translateX(-14px)}50%{transform:translateX(14px)}}
+@keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes shim{0%,100%{opacity:.2}50%{opacity:.9}}
+@keyframes rip{0%{transform:scale(.4);opacity:.7}100%{transform:scale(1.5);opacity:0}}
+@keyframes ff{0%,100%{transform:translate(0,0);opacity:.25}50%{transform:translate(12px,-16px);opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Un rêve sous la lune</h1>
+  <p class="sub">Des nuages, une lune, des étoiles, un arbre aux feuilles suspendues, un pont sur la rivière et un bassin où fleurit un lotus.</p>
+  <figure>
+  <svg viewBox="0 0 800 600" role="img" aria-label="Paysage de rêve nocturne : lune, étoiles, nuages, arbre, rivière avec un pont, bassin avec un lotus">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#130f3a"/><stop offset=".55" stop-color="#3d2a7a"/>
+        <stop offset=".85" stop-color="#a15a9e"/><stop offset="1" stop-color="#e79bb0"/>
+      </linearGradient>
+      <radialGradient id="glow"><stop offset="0" stop-color="#fff3c4" stop-opacity=".85"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></radialGradient>
+      <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a78c4"/><stop offset="1" stop-color="#213f80"/></linearGradient>
+      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26506a"/><stop offset="1" stop-color="#101d38"/></linearGradient>
+      <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+      <g id="cloud"><ellipse cx="0" cy="12" rx="56" ry="15"/><circle cx="-24" cy="2" r="18"/><circle cx="6" cy="-8" r="26"/><circle cx="36" cy="4" r="17"/></g>
+      <g id="hang"><line x1="0" y1="0" x2="0" y2="34" stroke="#9fd8c8" stroke-width="1.2"/><path d="M0 30C9 38 9 52 0 62C-9 52 -9 38 0 30Z" fill="#7fd1b0"/><path d="M0 34V58" stroke="#3e9a92" stroke-width=".8"/></g>
+      <path id="petal" d="M0 0C-11 -12 -11 -30 0 -44C11 -30 11 -12 0 0Z"/>
+    </defs>
+
+    <!-- Ciel -->
+    <rect width="800" height="400" fill="url(#sky)"/>
+    <g id="stars"></g>
+
+    <!-- Lune -->
+    <circle cx="400" cy="170" r="115" fill="url(#glow)"/>
+    <circle cx="400" cy="170" r="50" fill="#fff3c4"/>
+    <g fill="#f0dfa4" opacity=".75"><circle cx="385" cy="158" r="9"/><circle cx="418" cy="186" r="7"/><circle cx="412" cy="150" r="5"/></g>
+
+    <!-- Grande étoile (haut à droite) -->
+    <g transform="translate(590 95)">
+      <circle r="30" fill="#fff3c4" opacity=".25" filter="url(#soft)"/>
+      <polygon class="pulse" fill="#ffe9a0" points="0,-22 5.3,-7.3 20.9,-6.8 8.6,2.8 12.9,17.8 0,9 -12.9,17.8 -8.6,2.8 -20.9,-6.8 -5.3,-7.3"/>
+    </g>
+
+    <!-- Nuages -->
+    <g class="drift" style="animation-duration:15s"><use href="#cloud" fill="#f3e6ff" opacity=".92" transform="translate(110 78) scale(1.4)"/></g>
+    <g class="drift" style="animation-duration:19s;animation-delay:-6s"><use href="#cloud" fill="#f3e6ff" opacity=".85" transform="translate(268 42) scale(.7)"/></g>
+    <g class="drift" style="animation-duration:17s;animation-delay:-3s"><use href="#cloud" fill="#f3e6ff" opacity=".9" transform="translate(718 58) scale(1.1)"/></g>
+    <g class="drift" style="animation-duration:22s;animation-delay:-9s"><use href="#cloud" fill="#ffd9ec" opacity=".45" transform="translate(470 205) scale(.8)"/></g>
+
+    <!-- Collines et sol -->
+    <path d="M0 400C100 366 200 392 300 378C400 364 500 392 600 376C700 364 760 384 800 378L800 600L0 600Z" fill="#2b2150"/>
+    <rect y="396" width="800" height="204" fill="url(#ground)"/>
+
+    <!-- Rivière -->
+    <path d="M386 392C376 450 250 510 140 600L660 600C550 510 424 450 414 392Z" fill="url(#water)"/>
+    <path d="M386 392C376 450 250 510 140 600M414 392C424 450 550 510 660 600" fill="none" stroke="#6a5aa0" stroke-width="2" opacity=".6"/>
+    <g stroke="#fff3c4" stroke-width="3" stroke-linecap="round" fill="none">
+      <line class="shim" x1="392" y1="410" x2="408" y2="410"/>
+      <line class="shim" style="animation-delay:-1s" x1="388" y1="426" x2="412" y2="426"/>
+      <line class="shim" style="animation-delay:-2s" x1="362" y1="524" x2="438" y2="524"/>
+      <line class="shim" style="animation-delay:-.5s" x1="342" y1="544" x2="458" y2="544"/>
+      <line class="shim" style="animation-delay:-1.5s" x1="322" y1="564" x2="478" y2="564"/>
+      <line class="shim" style="animation-delay:-2.5s" x1="302" y1="584" x2="498" y2="584"/>
+    </g>
+
+    <!-- Arbre -->
+    <path d="M100 448C108 400 106 350 114 305L136 305C140 350 138 400 148 448Z" fill="#2e2145"/>
+    <g stroke="#2e2145" stroke-linecap="round" fill="none"><path d="M122 320C92 292 66 280 44 250" stroke-width="9"/><path d="M128 312C160 285 196 272 226 244" stroke-width="9"/><path d="M126 345C100 338 80 342 58 326" stroke-width="6"/></g>
+    <g fill="#2c6b73"><circle cx="60" cy="215" r="44"/><circle cx="130" cy="178" r="54"/><circle cx="205" cy="210" r="44"/><circle cx="100" cy="238" r="36"/><circle cx="165" cy="240" r="36"/></g>
+    <g fill="#3e9a92" opacity=".5"><circle cx="115" cy="160" r="30"/><circle cx="192" cy="198" r="22"/><circle cx="48" cy="204" r="20"/></g>
+    <g transform="translate(62 254) scale(.9)"><use href="#hang" class="sway"/></g>
+    <g transform="translate(92 272) scale(1.1)"><use href="#hang" class="sway" style="animation-delay:-1.2s"/></g>
+    <g transform="translate(128 262)"><use href="#hang" class="sway" style="animation-delay:-2.4s"/></g>
+    <g transform="translate(165 274) scale(.8)"><use href="#hang" class="sway" style="animation-delay:-3.1s"/></g>
+    <g transform="translate(198 248)"><use href="#hang" class="sway" style="animation-delay:-.6s"/></g>
+    <g transform="translate(32 246) scale(.8)"><use href="#hang" class="sway" style="animation-delay:-1.9s"/></g>
+
+    <!-- Pont -->
+    <path d="M268 496Q400 414 532 496L532 510L268 510Z" fill="#6d5a85"/>
+    <path d="M318 510Q318 474 400 472Q482 474 482 510Z" fill="#1e3a78"/>
+    <path d="M268 496Q400 414 532 496" fill="none" stroke="#b79bc9" stroke-width="6"/>
+    <path d="M268 482Q400 400 532 482" fill="none" stroke="#cdb4d4" stroke-width="3"/>
+    <path d="M294 481v-14M347 462v-14M400 455v-14M453 462v-14M506 481v-14" stroke="#cdb4d4" stroke-width="3" fill="none"/>
+    <circle cx="268" cy="474" r="14" fill="#ffd98a" opacity=".4" filter="url(#soft)"/><circle cx="268" cy="474" r="5" fill="#ffd98a"/>
+    <circle cx="532" cy="474" r="14" fill="#ffd98a" opacity=".4" filter="url(#soft)"/><circle cx="532" cy="474" r="5" fill="#ffd98a"/>
+
+    <!-- Bassin d'eau et lotus -->
+    <ellipse cx="690" cy="552" rx="95" ry="32" fill="url(#water)" stroke="#5d7fa0" stroke-width="3"/>
+    <ellipse class="rip" cx="692" cy="552" rx="40" ry="11" fill="none" stroke="#cfc3ff" stroke-width="1.5"/>
+    <ellipse class="rip" style="animation-delay:-2.5s" cx="692" cy="552" rx="40" ry="11" fill="none" stroke="#cfc3ff" stroke-width="1.5"/>
+    <g fill="#2f9a78"><ellipse cx="640" cy="556" rx="16" ry="6"/><ellipse cx="740" cy="548" rx="15" ry="5.5"/><ellipse cx="722" cy="567" rx="14" ry="5"/><ellipse cx="655" cy="540" rx="12" ry="4.5"/></g>
+    <g transform="translate(692 552)">
+      <circle cy="-24" r="36" fill="#ffb8d8" opacity=".3" filter="url(#soft)"/>
+      <g fill="#f08cb8"><use href="#petal" transform="rotate(-65)"/><use href="#petal" transform="rotate(-35)"/><use href="#petal" transform="rotate(35)"/><use href="#petal" transform="rotate(65)"/><use href="#petal"/></g>
+      <g fill="#ffc9e1" stroke="#f08cb8" stroke-width=".6"><use href="#petal" transform="rotate(-45) scale(.85)"/><use href="#petal" transform="rotate(45) scale(.85)"/><use href="#petal" transform="rotate(-18) scale(.9)"/><use href="#petal" transform="rotate(18) scale(.9)"/></g>
+      <ellipse cy="-10" rx="6" ry="3.5" fill="#ffd25e"/>
+    </g>
+
+    <!-- Lucioles -->
+    <g fill="#ffe58a">
+      <circle class="ff" cx="235" cy="505" r="2.4"/>
+      <circle class="ff" style="animation-delay:-2s;animation-duration:7s" cx="585" cy="440" r="2.4"/>
+      <circle class="ff" style="animation-delay:-4s" cx="620" cy="500" r="2.4"/>
+      <circle class="ff" style="animation-delay:-1s;animation-duration:8s" cx="170" cy="520" r="2.4"/>
+    </g>
+  </svg>
+  </figure>
+</main>
+<script>
+(function(){
+  var g=document.getElementById('stars'),s=7;
+  function r(){s=(s*16807)%2147483647;return s/2147483647}
+  for(var i=0;i<46;i++){
+    var c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',(r()*800).toFixed(0));
+    c.setAttribute('cy',(r()*320).toFixed(0));
+    c.setAttribute('r',(0.6+r()*1.4).toFixed(1));
+    c.setAttribute('fill','#fff');
+    c.setAttribute('class','tw');
+    c.style.animationDelay=(-r()*4).toFixed(1)+'s';
+    c.style.animationDuration=(2+r()*3).toFixed(1)+'s';
+    g.appendChild(c);
+  }
+})();
+</script>
+</body>
+</html>

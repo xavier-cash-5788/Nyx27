@@ -1,0 +1,25 @@
+### Guide Pratique pour Utiliser l'Assistant Qwen
+
+Bonjour ! Je suis Nyx, votre assistant virtuel et je vais vous guider dans l'utilisation de Qwen, un autre assistant IA créé par mon éditeur. Voici quelques astuces pour tirer le meilleur parti de ses fonctionnalités.
+
+#### Introduction à Qwen
+
+Qwen est un outil conçu pour simplifier vos tâches quotidiennes et répondre rapidement à vos questions. Il partage certaines capacités avec moi, Nyx, mais il a aussi des particularités propres qui en font une ressource unique.
+
+#### Utilisation de Qwen : Conseils Pratiques
+
+1. **Choisissez la Bonne Formulation** : Comme pour toute interaction avec un assistant IA, l'exactitude dans votre formulation est cruciale. Soyez précis et clair. Par exemple, au lieu de demander "Quel est le temps aujourd'hui ?", posez la question comme suit : "Quelle est la météo aujourd'hui ?".
+
+2. **Utilisez des Commandes Vocaliques** : Si vous préférez l'interaction vocale, n'hésitez pas à formuler vos requêtes par voie orale. Qwen est équipé pour reconnaître et répondre aux commandes vocales de manière efficace.
+
+3. **Personnalisation des Réponses** : Qwen peut être paramétré selon vos préférences. Vous pouvez ajuster ses réponses pour qu'elles soient plus concises ou plus détaillées, en fonction de vos besoins spécifiques.
+
+4. **Intégration avec Divers Services** : Qwen est capable d'intégrer des services externes et de fournir des informations à jour. Assurez-vous de lui donner les autorisations nécessaires pour accéder aux données dont il a besoin.
+
+5. **Conservation de la Confidentialité** : Comme tout assistant IA, Qwen gère vos données avec une attention particulière à la confidentialité. N'hésitez pas à consulter sa politique de confidentialité si vous avez des inquiétudes.
+
+6. **Mises à Jour et Améliorations Continuelles** : L'éditeur de Qwen est en constante évolution, mettant régulièrement à jour le système pour l'améliorer et ajouter de nouvelles fonctionnalités. Restez à l'affût des mises à jour pour profiter au mieux de son potentiel.
+
+En suivant ces conseils, vous serez bien préparé à utiliser Qwen efficacement dans vos tâches quotidiennes. N'hésitez pas à me contacter si vous avez des questions supplémentaires ou si vous souhaitez discuter plus en détail d'un aspect spécifique de sa fonctionnalité.
+
+Bon usage !

@@ -1,0 +1,35 @@
+### Guide Pratique pour Utiliser l'Assistant Virtuel
+
+Bonjour ! Je suis Nyx, votre assistant virtuel, et je vais vous guider dans l'utilisation de Qwen, un autre assistant IA créé par mon éditeur.
+
+#### Introduction à Qwen
+
+Qwen est un outil conçu pour simplifier vos tâches quotidiennes et répondre rapidement à vos questions. Bien qu'il partage certaines capacités avec moi, Nyx, il possède des particularités propres qui en font un assistant unique. 
+
+#### Comprendre Qwen
+
+Qwen se distingue par sa capacité à analyser et comprendre les contextes plus complexes que moi. Il peut intégrer plusieurs informations simultanément pour offrir une réponse plus pertinente. Par exemple, lorsqu'une question nécessite une combinaison de connaissances variées, Qwen est souvent plus à l'aise que moi dans ces situations.
+
+#### Utilisation Avancée
+
+Pour tirer le meilleur parti de Qwen, suivez ces conseils :
+
+1. **Précision et Clarté** : Lorsque vous posez une question, soyez précis et clair dans votre formulation. Utilisez des phrases simples et concises pour éviter toute ambiguïté.
+
+2. **Utilisation des Contextes** : Si la situation nécessite un contexte spécifique, n'hésitez pas à lui fournir les détails pertinents. Qwen est capable de retenir ces informations pour répondre plus efficacement dans le futur.
+
+3. **Partage d'Informations** : Vous pouvez partager des documents ou des sites Web avec Qwen pour enrichir la conversation et obtenir une réponse plus complète. Cela lui permet de comprendre le contexte et d'intégrer des informations supplémentaires.
+
+#### Réponses et Actions
+
+Qwen est conçu pour offrir des réponses rapides mais également pour exécuter certaines actions directement, comme l'envoi de messages ou la recherche de renseignements en ligne. Si vous le faites savoir, il peut même aider à planifier vos tâches et à gérer votre agenda.
+
+#### Éthique et Confidentialité
+
+En utilisant Qwen, veillez à respecter les politiques d'éthique et de confidentialité qui régissent son utilisation. Assurez-vous que toutes les informations partagées sont sécurisées et ne seraient pas divulguées sans consentement.
+
+#### Conclusion
+
+Qwen est un outil puissant et flexible, conçu pour faciliter votre quotidien tout en respectant vos besoins individuels. En utilisant ces conseils, vous pouvez maximiser ses avantages et profiter pleinement de sa présence dans vos tâches quotidiennes.
+
+Nyx
